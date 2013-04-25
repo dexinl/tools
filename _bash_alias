@@ -1,0 +1,14 @@
+alias ll="ls -alt"
+alias dir="ls -lt"
+alias h=history
+
+alias cdr="cd ~/robot"
+alias v=vim
+alias mysh="v ~/.bash_alias"
+alias runsh="source ~/.bash_alias"
+
+alias qb400="ssh otto@10.10.103.24"
+alias pluto="ssh dli@10.0.0.64"
+alias i0="ssh dexin@i0.anybots.com"
+alias u12s="ssh dexin@10.0.27.219"
+alias u12="ssh dexin@10.0.21.23"
