@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import random, math
+import random, math, time
 
 problem_cnt = 20
 problem_min = 2
@@ -115,7 +115,6 @@ class ProblemConsole():
         return (self.count_, self.type_, 2, self.range_)
 
     def run(self, test_set):
-        print "running .."
 
         sign_dict = {0: '+',
                      1: '-',
@@ -146,6 +145,7 @@ class ProblemConsole():
             print "Failed problems (and correct answer): "
             for a,b,c,d in failed:
                 print "  %2d  %s %2d  = %2d" % (a, sign_dict[c], b, d)
+            print "Score: %03d / %03d" % (len(test_set) - len(failed), len(test_set))
         else:
             print "Congratulations! Everything is correct!"
 
@@ -155,7 +155,12 @@ cfg = console.configConsole()
 
 generator = ArithmaticProblemGen(cfg)
 test_set = generator.test_gen()
-print "Let's start ..."
+print "Let's start at %s" % time.strftime("%X")
+start_time = time.time()
 console.run(test_set)
+end_time = time.time()
+minutes, seconds = divmod(end_time - start_time, 60)
+print "Now it's %s" % time.strftime("%X")
+print "You took %d minute(s) %d second(s) to finish the problems." % (minutes, seconds)
 
 #generator.print_set(test_set, True)
