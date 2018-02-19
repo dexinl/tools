@@ -1,0 +1,161 @@
+#!/usr/bin/python
+
+import random, math
+
+problem_cnt = 20
+problem_min = 2
+problem_max = 100
+problem_typ = 'asmd'
+
+class ArithmaticProblemGen():
+    def __init__(self, cfg):
+        """
+        cnt: the number of problems
+        typ:  'a'      - addition
+              'as'     - addition, subtraction
+              'asm'    - addition, subtraction, multiplication
+              'asmd'   - addition, subtraction, multiplication, devision
+        (min_, max_)   - inputs and result are within [min, max]
+        """
+        self.problem_cnt = cfg[0]
+        self.problem_typ = cfg[1]
+        self.problem_min = cfg[2]
+        self.problem_max = cfg[3]
+
+    def test_gen(self):
+        if self.problem_typ not in ('a', 'as', 'asm', 'asmd'):
+            return None
+        sign_range = len(self.problem_typ)
+    
+        test_set = [] # (input1, input2, sign, answer)
+        count = self.problem_cnt
+        while count:
+            a = random.randrange(self.problem_min, self.problem_max)
+            b = random.randrange(self.problem_min, self.problem_max)
+            c = 0
+            if sign_range > 1:
+                c = random.randrange(0,sign_range)
+    
+            if c == 0 or c == 1: # addition and subtraction
+                if a == b: continue
+                big = max(a, b)
+                little = min (a, b)
+                diff = big - little
+                if diff < self.problem_min : continue
+                if c == 0:
+                    if (diff, little) not in test_set and (little, diff) not in test_set:
+                        test_set.append((diff, little, c, diff + little))
+                        count -= 1
+                if c == 1: # subtraction
+                    if (big, little) not in test_set:
+                        test_set.append((big, little, c, big - little))
+                        count -= 1
+            if c == 2 or c == 3: # multiplication and division
+                big = max(a, b)
+                little = min (a, b)
+                sqrt_max = int(math.sqrt(self.problem_max))
+                if sqrt_max < little:
+                   little /= 2
+                (result, leftover) = divmod(big, little)
+                if result < self.problem_min: continue
+                if c == 2:
+                    if (little, result) not in test_set:
+                        test_set.append((little, result, c, little * result))
+                        count -= 1
+                if c == 3:
+                    if (result*little, little) not in test_set:
+                        test_set.append((result*little, little, c, result))
+                        count -= 1
+        return test_set
+    
+    def print_set(self, test_set=[], with_answer = False):
+        if not test_set: 
+            return
+    
+        sign_dict = {0: '+',
+                     1: '-',
+                     2: '*',
+                     3: '/'}
+    
+        for (a, b, c, d) in test_set:
+            if with_answer:
+                print "  %2d  %s %2d  = %2d" % (a, sign_dict[c], b, d)
+            else:
+                print "  %2d  %s %2d  = " % (a, sign_dict[c], b)
+    
+class ProblemConsole():
+    def __init__(self, test_set=[]):
+        self.test_set = test_set
+
+    def configConsole(self):
+        while 1:
+            try:
+                text = raw_input("Please input problem range(20, 100, 1000):")
+                self.range_ = eval(text)
+                if self.range_ in (20, 100, 1000): break
+            except:
+                pass
+
+        while 1:
+            try:
+                text = raw_input("(a)ddition, (s)ubtraction, (m)ultiplication, (d)ivision \n please select from ('a', 'as', 'asm', 'asmd'):")
+                self.type_ = text
+                if text in ('a', 'as', 'asm', 'asmd'): break
+            except:
+                pass
+
+        while 1:
+            try:
+                text = raw_input("How many problems to solve (5, 10, 20):")
+                self.count_ = eval(text)
+                if self.count_ in (5, 10, 20): break
+            except:
+                pass
+
+        return (self.count_, self.type_, 2, self.range_)
+
+    def run(self, test_set):
+        print "running .."
+
+        sign_dict = {0: '+',
+                     1: '-',
+                     2: '*',
+                     3: '/'}
+    
+        failed = []
+        for (a, b, c, d) in test_set:
+            i = 0
+            good = 0
+            while 1:
+                text = raw_input("  %2d  %s %2d  = " % (a, sign_dict[c], b))
+                if not text: continue
+                try:
+                    if eval(text) == d: 
+                        good = 1;
+                        break
+                    i += 1
+                    if i == 3: break
+                except:
+                    pass
+
+            if not good:
+                print "This problem is failed"
+                failed.append((a, b, c, d))
+    
+        if failed:
+            print "Failed problems (and correct answer): "
+            for a,b,c,d in failed:
+                print "  %2d  %s %2d  = %2d" % (a, sign_dict[c], b, d)
+        else:
+            print "Congratulations! Everything is correct!"
+
+
+console = ProblemConsole()
+cfg = console.configConsole()
+
+generator = ArithmaticProblemGen(cfg)
+test_set = generator.test_gen()
+print "Let's start ..."
+console.run(test_set)
+
+#generator.print_set(test_set, True)
