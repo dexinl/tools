@@ -1,11 +1,23 @@
 #!/usr/bin/python
 
-import random, math, time
+"""
+This script helps parents or teachers create math problems for elementary kids to exercise.
 
-problem_cnt = 20
-problem_min = 2
-problem_max = 100
-problem_typ = 'asmd'
+The kid is prompt with the number range, the calculation types (+, -, *, /), and the number 
+of problem to solve.
+
+Each incorrectly answered problem will have two more chances to correct. If still incorrect,
+the problem is considered failed.
+
+At the end of the session, the failed problems are listed with correct answers, if any.
+The total elapsed time is displayed at the end as well.
+
+To start the script:
+    python start-work
+
+"""
+
+import random, math, time
 
 class ArithmaticProblemGen():
     def __init__(self, cfg):
@@ -150,17 +162,24 @@ class ProblemConsole():
             print "Congratulations! Everything is correct!"
 
 
+# specify the problem configurations
 console = ProblemConsole()
 cfg = console.configConsole()
 
+# generating problem
 generator = ArithmaticProblemGen(cfg)
 test_set = generator.test_gen()
-print "Let's start at %s" % time.strftime("%X")
+
+# start the exercise
 start_time = time.time()
+print "Let's start at %s" % time.strftime("%H:%M:%S", time.gmtime(start_time))
 console.run(test_set)
+
+# get results and stats
 end_time = time.time()
+print "Now it's %s" % time.strftime("%H:%M:%S", time.gmtime(end_time))
+
 minutes, seconds = divmod(end_time - start_time, 60)
-print "Now it's %s" % time.strftime("%X")
 print "You took %d minute(s) %d second(s) to finish the problems." % (minutes, seconds)
 
 #generator.print_set(test_set, True)
