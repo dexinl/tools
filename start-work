@@ -35,6 +35,9 @@ To start the script:
 
 import random, math, time
 
+PROBLEM_RANGE = (20, 100, 1000)
+PROBLEM_COUNT = (1, 5, 10, 20)
+
 class ArithmaticProblemGen():
     def __init__(self, cfg):
         """
@@ -51,9 +54,7 @@ class ArithmaticProblemGen():
         self.problem_max = cfg[3]
 
     def test_gen(self):
-        if self.problem_typ not in ('a', 'as', 'asm', 'asmd'):
-            return None
-        sign_range = len(self.problem_typ)
+        sign_dict = {'a': 0, 's': 1, 'm': 2, 'd': 3}
     
         test_set = [] # (input1, input2, sign, answer)
         count = self.problem_cnt
@@ -61,8 +62,11 @@ class ArithmaticProblemGen():
             a = random.randrange(self.problem_min, self.problem_max)
             b = random.randrange(self.problem_min, self.problem_max)
             c = 0
-            if sign_range > 1:
-                c = random.randrange(0,sign_range)
+
+            if len(self.problem_typ) > 1:
+                c = sign_dict[random.choice(self.problem_typ)]
+            else:
+                c = sign_dict[self.problem_typ]
     
             if c == 0 or c == 1: # addition and subtraction
                 if a == b: continue
@@ -111,32 +115,41 @@ class ArithmaticProblemGen():
             else:
                 print "  %2d  %s %2d  = " % (a, sign_dict[c], b)
     
+
 class ProblemConsole():
     def __init__(self, test_set=[]):
         self.test_set = test_set
 
+    def problemTypes(self, type_):
+        if not type_: return None
+        type_set = []
+        for i in list(type_):
+            if i in ('a', 's', 'm', 'd') and i not in type_set:
+                type_set.append(i)
+        return type_set
+
     def configConsole(self):
         while 1:
             try:
-                text = raw_input("Please input problem range(20, 100, 1000):")
+                text = raw_input("Please input problem range %s:" % str(PROBLEM_RANGE))
                 self.range_ = eval(text)
-                if self.range_ in (20, 100, 1000): break
+                if self.range_ in PROBLEM_RANGE: break
             except:
                 pass
 
         while 1:
             try:
-                text = raw_input("(a)ddition, (s)ubtraction, (m)ultiplication, (d)ivision \n please select from ('a', 'as', 'asm', 'asmd'):")
-                self.type_ = text
-                if text in ('a', 'as', 'asm', 'asmd'): break
+                text = raw_input("(a)ddition, (s)ubtraction, (m)ultiplication, (d)ivision \n please select from ['a'|'s'|'m'|'d'] :")
+                self.type_ = self.problemTypes(text)
+                if self.type_: break
             except:
                 pass
 
         while 1:
             try:
-                text = raw_input("How many problems to solve (5, 10, 20):")
+                text = raw_input("How many problems to solve %s:" % str(PROBLEM_COUNT))
                 self.count_ = eval(text)
-                if self.count_ in (5, 10, 20): break
+                if self.count_ in PROBLEM_COUNT : break
             except:
                 pass
 
