@@ -17,13 +17,16 @@
  * limitations under the License.
 
 
-This script helps parents or teachers create math problems for elementary kids to exercise.
+This script helps parents or teachers create math problems for elementary 
+kids to exercise. Suggestions to improve this script, please send to 
 
-The kid is prompt with the number range, the calculation types (+, -, *, /), and the number 
-of problem to solve.
+    dexinl@gmail.com
 
-Each incorrectly answered problem will have two more chances to correct. If still incorrect,
-the problem is considered failed.
+The user is prompted with the number range, the calculation types (+-*/), 
+and the number of problems to solve.
+
+Each incorrectly answered problem can retry once. If still incorrect, it 
+is considered failed.
 
 At the end of the session, the failed problems are listed with correct answers, if any.
 The total elapsed time is displayed at the end as well.
