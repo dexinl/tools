@@ -35,7 +35,7 @@ To start the script:
 
 import random, math, time
 
-PROBLEM_RANGE = (20, 100, 1000)
+PROBLEM_RANGE = (20, 100)
 PROBLEM_COUNT = (1, 5, 10, 20)
 
 class ArithmaticProblemGen():
@@ -174,7 +174,7 @@ class ProblemConsole():
                         good = 1;
                         break
                     i += 1
-                    if i == 3: break
+                    if i == 2: break
                 except:
                     pass
 
