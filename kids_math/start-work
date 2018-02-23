@@ -66,10 +66,7 @@ class ArithmaticProblemGen():
             b = random.randrange(self.problem_min, self.problem_max)
             c = 0
 
-            if len(self.problem_typ) > 1:
-                c = sign_dict[random.choice(self.problem_typ)]
-            else:
-                c = sign_dict[self.problem_typ]
+            c = sign_dict[random.choice(self.problem_typ)]
     
             if c == 0 or c == 1: # addition and subtraction
                 if a == b: continue
@@ -78,12 +75,15 @@ class ArithmaticProblemGen():
                 diff = big - little
                 if diff < self.problem_min : continue
                 if c == 0:
-                    if (diff, little) not in test_set and (little, diff) not in test_set:
-                        test_set.append((diff, little, c, diff + little))
+                    p1 = (diff, little, c, diff + little)
+                    p2 = (little, diff, c, diff + little)
+                    if p1  not in test_set and p2 not in test_set:
+                        test_set.append(p1)
                         count -= 1
                 if c == 1: # subtraction
-                    if (big, little) not in test_set:
-                        test_set.append((big, little, c, big - little))
+                    p = (big, little, c, big - little)
+                    if p not in test_set:
+                        test_set.append(p)
                         count -= 1
             if c == 2 or c == 3: # multiplication and division
                 big = max(a, b)
@@ -94,12 +94,14 @@ class ArithmaticProblemGen():
                 (result, leftover) = divmod(big, little)
                 if result < self.problem_min: continue
                 if c == 2:
-                    if (little, result) not in test_set:
-                        test_set.append((little, result, c, little * result))
+                    p = (little, result, c, little * result)
+                    if p not in test_set:
+                        test_set.append(p)
                         count -= 1
                 if c == 3:
-                    if (result*little, little) not in test_set:
-                        test_set.append((result*little, little, c, result))
+                    p = (result*little, little, c, result)
+                    if p not in test_set:
+                        test_set.append(p)
                         count -= 1
         return test_set
     
