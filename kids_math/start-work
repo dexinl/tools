@@ -36,7 +36,7 @@ To start the script:
 
 """
 
-import random, math, time
+import random, math, time, datetime
 
 PROBLEM_RANGE = (20, 100)
 PROBLEM_COUNT = (1, 5, 10, 20)
@@ -206,12 +206,15 @@ test_set = generator.test_gen()
 
 # start the exercise
 start_time = time.time()
-print "Let's start at %s" % time.strftime("%H:%M:%S", time.gmtime(start_time))
+start_ = datetime.datetime.now()
+print "Let's start at %s" % str(start_).split()[1].split('.')[0]
 console.run(test_set)
 
 # get results and stats
 end_time = time.time()
-print "Now it's %s" % time.strftime("%H:%M:%S", time.gmtime(end_time))
+end_ = datetime.datetime.now()
+print "Now it's %s" % str(end_).split()[1].split('.')[0]
+
 
 minutes, seconds = divmod(end_time - start_time, 60)
 print "You took %d minute(s) %d second(s) to finish the problems." % (minutes, seconds)
