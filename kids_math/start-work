@@ -45,10 +45,10 @@ class ArithmaticProblemGen():
     def __init__(self, cfg):
         """
         cnt: the number of problems
-        typ:  'a'      - addition
-              'as'     - addition, subtraction
-              'asm'    - addition, subtraction, multiplication
-              'asmd'   - addition, subtraction, multiplication, devision
+        typ:  'a'   - addition
+              's'   - subtraction
+              'm'   - multiplication
+              'd'   - division
         (min_, max_)   - inputs and result are within [min, max]
         """
         self.problem_cnt = cfg[0]
@@ -105,22 +105,6 @@ class ArithmaticProblemGen():
                         count -= 1
         return test_set
     
-    def print_set(self, test_set=[], with_answer = False):
-        if not test_set: 
-            return
-    
-        sign_dict = {0: '+',
-                     1: '-',
-                     2: '*',
-                     3: '/'}
-    
-        for (a, b, c, d) in test_set:
-            if with_answer:
-                print "  %2d  %s %2d  = %2d" % (a, sign_dict[c], b, d)
-            else:
-                print "  %2d  %s %2d  = " % (a, sign_dict[c], b)
-    
-
 class ProblemConsole():
     def __init__(self, test_set=[]):
         self.test_set = test_set
@@ -168,11 +152,12 @@ class ProblemConsole():
                      3: '/'}
     
         failed = []
+        count = 1
         for (a, b, c, d) in test_set:
             i = 0
             good = 0
             while 1:
-                text = raw_input("  %2d  %s %2d  = " % (a, sign_dict[c], b))
+                text = raw_input("Problem %2d :  %2d  %s %2d  = " % (count, a, sign_dict[c], b))
                 if not text: continue
                 try:
                     if eval(text) == d: 
@@ -186,6 +171,7 @@ class ProblemConsole():
             if not good:
                 print "This problem is failed"
                 failed.append((a, b, c, d))
+            count += 1
     
         if failed:
             print "Failed problems (and correct answer): "
@@ -193,7 +179,8 @@ class ProblemConsole():
                 print "  %2d  %s %2d  = %2d" % (a, sign_dict[c], b, d)
             print "Score: %03d / %03d" % (len(test_set) - len(failed), len(test_set))
         else:
-            print "Congratulations! Everything is correct!"
+            print "Congratulations! All problems are correctly answered!"
+            print
 
 
 # specify the problem configurations
@@ -207,6 +194,7 @@ test_set = generator.test_gen()
 # start the exercise
 start_time = time.time()
 start_ = datetime.datetime.now()
+print
 print "Let's start at %s" % str(start_).split()[1].split('.')[0]
 console.run(test_set)
 
@@ -219,4 +207,3 @@ print "Now it's %s" % str(end_).split()[1].split('.')[0]
 minutes, seconds = divmod(end_time - start_time, 60)
 print "You took %d minute(s) %d second(s) to finish the problems." % (minutes, seconds)
 
-#generator.print_set(test_set, True)
