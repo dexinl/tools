@@ -39,7 +39,7 @@ To start the script:
 import random, math, time, datetime
 
 PROBLEM_RANGE = (20, 100)
-PROBLEM_COUNT = (1, 5, 10, 20)
+PROBLEM_COUNT = (5, 10, 20)
 
 class ArithmaticProblemGen():
     def __init__(self, cfg):
