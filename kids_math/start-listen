@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 
@@ -39,7 +40,7 @@ To start the script:
 
 """
 
-import random, math, time, datetime, subprocess
+import random, math, time, datetime, subprocess, os
 
 PROBLEM_RANGE = (20, 100)
 PROBLEM_COUNT = (5, 10, 20)
@@ -111,6 +112,18 @@ class ArithmaticProblemGen():
 class ProblemConsole():
     def __init__(self, test_set=[]):
         self.test_set = test_set
+        self.sign_audio_dict = {
+            'en': {
+                '+'     : 'plus',
+                '-'     : 'minus',
+                '*'     : 'times',
+                '/'     : 'divided by' },
+            'zh': {
+                '+'     : '加上',
+                '-'     : '减去',
+                '*'     : '乘以',
+                '/'     : '除以' } }
+
 
     def problemTypes(self, type_):
         if not type_: return None
@@ -121,6 +134,18 @@ class ProblemConsole():
         return type_set
 
     def configConsole(self):
+        if 1:
+            self.say_option = ''
+            self.language = 'en'
+            try:
+                text = raw_input("Please input launguage (0: English (default); 1: Chinese): ")
+                if eval(text) == 1:
+                    self.say_option = ' -v Ting-Ting '
+                    self.language = 'zh'
+            except:
+                pass
+
+
         while 1:
             try:
                 text = raw_input("Please input problem range %s:" % str(PROBLEM_RANGE))
@@ -151,30 +176,10 @@ class ProblemConsole():
         audio_file = "%s/audio_%s.m4a" % ('audio_files', i)
         subprocess.call(["afplay", audio_file])
 
-    def say_a_thing(self, athing):
-        sign_audio_dict = {
-                '+'     : 'plus',
-                '-'     : 'minus',
-                '*'     : 'times',
-                '/'     : 'div' }
-        if isinstance(athing, int):
-            if athing <= 20:
-                item = "%s" % athing
-                self.say_(item)
-            else:
-                ten, unit = divmod(athing, 10)
-                self.say_(ten*10)
-                if unit:
-                    self.say_(unit)
-        else:
-            item = sign_audio_dict[athing]
-            self.say_(item)
-
     def speak_problem(self, test):
         a, s, b = test
-        self.say_a_thing(a)
-        self.say_a_thing(s)
-        self.say_a_thing(b)
+        sign = self.sign_audio_dict[self.language][s]
+        os.system('say %s %d %s %d' % (self.say_option, a, sign, b))
 
     def run(self, test_set):
         sign_dict = {0: '+',
