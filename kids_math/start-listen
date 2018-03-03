@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/local/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -41,6 +41,7 @@ To start the script:
 """
 
 import random, math, time, datetime, subprocess, os
+import speech_recognition as sr
 
 PROBLEM_RANGE = (20, 100)
 PROBLEM_COUNT = (5, 10, 20)
@@ -124,6 +125,7 @@ class ProblemConsole():
                 '*'     : '乘以',
                 '/'     : '除以' } }
 
+        self.r = sr.Recognizer()
 
     def problemTypes(self, type_):
         if not type_: return None
@@ -180,6 +182,28 @@ class ProblemConsole():
         sign = self.sign_audio_dict[self.language][s]
         os.system('say %s %d %s %d' % (self.say_option, a, sign, b))
 
+    def getResult(self):
+        # obtain audio from the microphone
+        while 1:
+            with sr.Microphone() as source:
+                audio = self.r.listen(source)
+        
+            # recognize speech using Google Speech Recognition
+            try:
+                # for testing purposes, we're just using the default API key
+                # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
+                # instead of `r.recognize_google(audio)`
+                data = self.r.recognize_google(audio)
+                print("Google Speech Recognition thinks you said " + data)
+            except sr.UnknownValueError:
+                print("Google Speech Recognition could not understand audio")
+            except sr.RequestError as e:
+                print("Could not request results from Google Speech Recognition service; {0}".format(e))
+            if data.isdigit(): 
+                break
+            print "what did you say? I am waiting for your answer"
+        return data
+        
     def run(self, test_set):
         sign_dict = {0: '+',
                      1: '-',
@@ -194,9 +218,11 @@ class ProblemConsole():
             while 1:
                 test = (a, sign_dict[c], b)
                 self.speak_problem(test)
-                text = raw_input("Problem %2d :  %2d  %s %2d  = " % (count, a, sign_dict[c], b))
+                #text = raw_input("Problem %2d :  %2d  %s %2d  = " % (count, a, sign_dict[c], b))
+                text = self.getResult()
                 if not text: continue
                 try:
+                    print 'get result: ', text
                     if eval(text) == d: 
                         good = 1;
                         break
