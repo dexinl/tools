@@ -145,7 +145,6 @@ class ProblemConsole():
             except:
                 pass
 
-
         while 1:
             try:
                 text = raw_input("Please input problem range %s:" % str(PROBLEM_RANGE))
@@ -217,7 +216,14 @@ class ProblemConsole():
                 print "  %2d  %s %2d  = %2d" % (a, sign_dict[c], b, d)
             print "Score: %03d / %03d" % (len(test_set) - len(failed), len(test_set))
         else:
-            print "Congratulations! All problems are correctly answered!"
+            if self.language == 'en':
+                congrats = "Congratulations! All problems are correctly answered!"
+            elif self.language == 'zh':
+                congrats = "太棒了，全做对了！"
+            else:
+                pass
+            os.system('say %s %s' % (self.say_option, congrats))
+            print a
             print
 
 
