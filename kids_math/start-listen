@@ -40,11 +40,14 @@ To start the script:
 
 """
 
-import random, math, time, datetime, subprocess, os
+import random, math, time, datetime, subprocess, os, sys
 import speech_recognition as sr
 
 PROBLEM_RANGE = (20, 100)
-PROBLEM_COUNT = (5, 10, 20)
+PROBLEM_COUNT = (1, 5, 10, 20)
+VOICE_SET     = {'en'   : ['Alex', 'Daniel', 'Fred', 'Karen', 'Moira', 'Samantha', 'Veena', 'Victoria'],
+                 'zh'   : ['Mei-Jia', 'Ting-Ting']
+                }
 
 class ArithmaticProblemGen():
     def __init__(self, cfg):
@@ -113,6 +116,14 @@ class ArithmaticProblemGen():
 class ProblemConsole():
     def __init__(self, test_set=[]):
         self.test_set = test_set
+        self.say_option = ''
+        self.count_     = 5
+        self.type_      = 'a'
+        self.min_       = 2
+        self.range_     = 20
+        self.voice_     = 'Alex'
+        self.lang_      = 'en'
+
         self.sign_audio_dict = {
             'en': {
                 '+'     : 'plus',
@@ -136,72 +147,86 @@ class ProblemConsole():
         return type_set
 
     def configConsole(self):
-        if 1:
-            self.say_option = ''
-            self.language = 'en'
+        args = sys.argv
+
+        # arguments list: (count, types, min_num, range, voice, language)
+        args_num = len(args)
+
+        if args_num > 1:
+            self.count_ = eval(args[1])
+            if self.count_ not in PROBLEM_COUNT:
+                print "The first argument has to be among %s" % PROBLEM_COUNT
+                return False
+
+        if args_num > 2:
+            self.type_ = self.problemTypes(args[2])
+            if not self.type_:
+                print "The second argument has to be among 'a', 's', 'm', 'd'"
+                return False
+
+        if args_num > 3:
             try:
-                text = raw_input("Please input launguage (0: English (default); 1: Chinese): ")
-                if eval(text) == 1:
-                    self.say_option = ' -v Ting-Ting '
-                    self.language = 'zh'
+                self.min_ = eval(args[3])
             except:
-                pass
+                self.min_ = 2
 
-        while 1:
-            try:
-                text = raw_input("Please input problem range %s:" % str(PROBLEM_RANGE))
-                self.range_ = eval(text)
-                if self.range_ in PROBLEM_RANGE: break
-            except:
-                pass
+        if args_num > 4:
+                self.range_ = eval(args[4])
+                if self.range_ not in PROBLEM_RANGE: 
+                    print "The fourth argument has to be among %s" % PROBLEM_RANGE
+                    return False
 
-        while 1:
-            try:
-                text = raw_input("(a)ddition, (s)ubtraction, (m)ultiplication, (d)ivision \n please select from ['a'|'s'|'m'|'d'] :")
-                self.type_ = self.problemTypes(text)
-                if self.type_: break
-            except:
-                pass
+        if args_num > 5:
+            self.voice_ = args[5]
+            if self.voice_ not in VOICE_SET['en'] and self.voice_ not in VOICE_SET['zh'] :
+                print "The fifty argument has to be among %s" % VOICE_SET
+                return False
 
-        while 1:
-            try:
-                text = raw_input("How many problems to solve %s:" % str(PROBLEM_COUNT))
-                self.count_ = eval(text)
-                if self.count_ in PROBLEM_COUNT : break
-            except:
-                pass
+            if self.voice_ in VOICE_SET['zh']:
+                self.lang_ = 'zh'
+            if self.voice_ in VOICE_SET['en']:
+                self.lang_ = 'en'
 
-        return (self.count_, self.type_, 2, self.range_)
+            self.say_option = '-v %s' % self.voice_
 
+        return (self.count_, self.type_, self.min_, self.range_, self.voice_, self.lang_)
+
+    """
     def say_(self, i):
         audio_file = "%s/audio_%s.m4a" % ('audio_files', i)
         subprocess.call(["afplay", audio_file])
+    """
 
     def speak_problem(self, test):
         a, s, b = test
-        sign = self.sign_audio_dict[self.language][s]
-        os.system('say %s %d %s %d' % (self.say_option, a, sign, b))
+        sign = self.sign_audio_dict[self.lang_][s]
+        cmd = 'say %s %d %s %d' % (self.say_option, a, sign, b)
+        os.system(cmd)
+
 
     def getResult(self):
         # obtain audio from the microphone
-        while 1:
+        while True:
             with sr.Microphone() as source:
+                print "listening ..."
                 audio = self.r.listen(source)
         
-            # recognize speech using Google Speech Recognition
-            try:
-                # for testing purposes, we're just using the default API key
-                # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
-                # instead of `r.recognize_google(audio)`
-                data = self.r.recognize_google(audio)
-                print("Google Speech Recognition thinks you said " + data)
-            except sr.UnknownValueError:
-                print("Google Speech Recognition could not understand audio")
-            except sr.RequestError as e:
-                print("Could not request results from Google Speech Recognition service; {0}".format(e))
-            if data.isdigit(): 
-                break
-            print "what did you say? I am waiting for your answer"
+                # recognize speech using Google Speech Recognition
+                data = ''
+                try:
+                    # for testing purposes, we're just using the default API key
+                    # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
+                    # instead of `r.recognize_google(audio)`
+                    data = self.r.recognize_google(audio)
+                    #print("Google Speech Recognition thinks you said " + data)
+                except sr.UnknownValueError:
+                    print("Google Speech Recognition could not understand audio")
+                except sr.RequestError as e:
+                    print("Could not request results from Google Speech Recognition service; {0}".format(e))
+
+                if data and data.isdigit(): 
+                    break
+                print "what did you say? I am waiting for your answer"
         return data
         
     def run(self, test_set):
@@ -217,12 +242,11 @@ class ProblemConsole():
             good = 0
             while 1:
                 test = (a, sign_dict[c], b)
+                print "Problem %2d :  %2d  %s %2d" % (count, a, sign_dict[c], b)
                 self.speak_problem(test)
-                #text = raw_input("Problem %2d :  %2d  %s %2d  = " % (count, a, sign_dict[c], b))
                 text = self.getResult()
-                if not text: continue
                 try:
-                    print 'get result: ', text
+                    print '  you said : ', text
                     if eval(text) == d: 
                         good = 1;
                         break
@@ -242,38 +266,56 @@ class ProblemConsole():
                 print "  %2d  %s %2d  = %2d" % (a, sign_dict[c], b, d)
             print "Score: %03d / %03d" % (len(test_set) - len(failed), len(test_set))
         else:
-            if self.language == 'en':
+            if self.lang_ == 'en':
                 congrats = "Congratulations! All problems are correctly answered!"
-            elif self.language == 'zh':
-                congrats = "太棒了，全做对了！"
+            elif self.lang_ == 'zh':
+                congrats = "好儿子，全做对了！"
             else:
                 pass
             os.system('say %s %s' % (self.say_option, congrats))
             print a
             print
 
+if __name__ == "__main__":
 
-# specify the problem configurations
-console = ProblemConsole()
-cfg = console.configConsole()
+    usage = """Usage: 
+        %s [problem_count] [operation_types] [min_number] [number_range] [voice]
+            problem_count   :  must be in [5, 10, 20] 
+            operation_types :  must be in ['a', 's', 'm', 'd'] or a combination of them
+            min_number      :  must be a positive integer
+            number_range    :  must be in [20, 100]
+            voice           :  must be in %s
+            """ % (__file__, VOICE_SET)
 
-# generating problem
-generator = ArithmaticProblemGen(cfg)
-test_set = generator.test_gen()
+    if len(sys.argv) == 1:
+        print usage
+        exit(1)
 
-# start the exercise
-start_time = time.time()
-start_ = datetime.datetime.now()
-print
-print "Let's start at %s" % str(start_).split()[1].split('.')[0]
-console.run(test_set)
+    # specify the problem configurations
+    console = ProblemConsole()
+    cfg = console.configConsole()
+    #cfg = (5, 'a', 2, 20, 'Ting-Ting', 'zh') # (count, types, min_num, range, voice, language)
+    
+    if not cfg:
+        print usage
+        exit(1)
 
-# get results and stats
-end_time = time.time()
-end_ = datetime.datetime.now()
-print "Now it's %s" % str(end_).split()[1].split('.')[0]
-
-
-minutes, seconds = divmod(end_time - start_time, 60)
-print "You took %d minute(s) %d second(s) to finish the problems." % (minutes, seconds)
+    # generating problem
+    generator = ArithmaticProblemGen(cfg)
+    test_set = generator.test_gen()
+    
+    # start the exercise
+    start_time = time.time()
+    start_ = datetime.datetime.now()
+    print
+    #print "Let's start at %s" % str(start_).split()[1].split('.')[0]
+    console.run(test_set)
+    
+    # get results and stats
+    end_time = time.time()
+    end_ = datetime.datetime.now()
+    #print "Now it's %s" % str(end_).split()[1].split('.')[0]
+    
+    minutes, seconds = divmod(end_time - start_time, 60)
+    print "You took %d minute(s) %d second(s) to finish the problems." % (minutes, seconds)
 
