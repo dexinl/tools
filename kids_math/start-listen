@@ -137,6 +137,10 @@ class ProblemConsole():
                 '/'     : '除以' } }
 
         self.r = sr.Recognizer()
+        self.m = sr.Microphone()
+        print("A moment of silence, please...")
+        with self.m as source: self.r.adjust_for_ambient_noise(source)
+        print("Set minimum energy threshold to {}".format(self.r.energy_threshold))
 
     def problemTypes(self, type_):
         if not type_: return None
@@ -207,10 +211,9 @@ class ProblemConsole():
     def getResult(self):
         # obtain audio from the microphone
         while True:
-            with sr.Microphone() as source:
-                print "listening ..."
+            #with sr.Microphone() as source:
+            with self.m as source:
                 audio = self.r.listen(source)
-        
                 # recognize speech using Google Speech Recognition
                 data = ''
                 try:
