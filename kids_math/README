@@ -1,4 +1,7 @@
-This directory contains two applications for kids match exercise.
+
+This directory contains two applications for kids math exercise.
+The user can specify the number of problems, operation types, number range of the exercises.
+
     start-work      : interactive keyboard
     start-listen    : interactive voice
 
